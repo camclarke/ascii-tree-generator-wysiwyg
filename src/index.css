@@ -1,0 +1,29 @@
+body {
+  background-color: white;
+  color: black;
+  margin: 20px;
+}
+
+.tree-container {
+  font-family: monospace;
+  white-space: pre;
+  margin-top: 20px;
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+}
+
+.tree-input {
+  border: none;
+  background: transparent;
+  font-family: monospace;
+  font-size: 1rem;
+  outline: none;
+  min-width: 200px;
+}
+
+.tree-input:focus {
+  background: #f0f0f0;
+}
