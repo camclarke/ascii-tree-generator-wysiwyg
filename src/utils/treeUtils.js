@@ -79,6 +79,61 @@ export const addSiblingAfter = (nodes, targetId, newValue = "") => {
   return { newNodes, addedNodeId, rejected };
 };
 
+export const indentNode = (nodes, targetId) => {
+  let targetNode = null;
+  let previousSibling = null;
+
+  // Find the target node and its previous sibling, and remove target from parent
+  const traverse = (currentNodes) => {
+    const targetIndex = currentNodes.findIndex(n => n.id === targetId);
+    if (targetIndex > 0) {
+      // Must not be the first child to be indented
+      targetNode = currentNodes[targetIndex];
+      previousSibling = currentNodes[targetIndex - 1];
+
+      return currentNodes.filter(n => n.id !== targetId);
+    } else if (targetIndex === 0) {
+      // It's the first child, cannot indent it (no previous sibling to attach to)
+      return currentNodes;
+    }
+
+    return currentNodes.map(node => {
+      if (node.children && node.children.length > 0) {
+        return {
+          ...node,
+          children: traverse(node.children)
+        };
+      }
+      return node;
+    });
+  };
+
+  let tempNodes = traverse(nodes);
+
+  if (!targetNode || !previousSibling) return nodes;
+
+  // Now insert the target node as the last child of the previousSibling
+  const insertIntoSibling = (currentNodes) => {
+    return currentNodes.map(node => {
+      if (node.id === previousSibling.id) {
+        return {
+          ...node,
+          children: [...node.children, targetNode]
+        };
+      }
+      if (node.children && node.children.length > 0) {
+        return {
+          ...node,
+          children: insertIntoSibling(node.children)
+        };
+      }
+      return node;
+    });
+  };
+
+  return insertIntoSibling(tempNodes);
+};
+
 export const outdentNode = (nodes, targetId) => {
   let targetNode = null;
   let finalNodes = [...nodes];

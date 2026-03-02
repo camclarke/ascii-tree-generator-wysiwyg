@@ -7,7 +7,8 @@ import {
   deleteNode,
   updateNodeValue,
   generateAsciiText,
-  outdentNode
+  outdentNode,
+  indentNode
 } from './utils/treeUtils';
 import './index.css';
 
@@ -23,15 +24,12 @@ function App() {
     if (e.key === 'Tab' && e.shiftKey) {
       e.preventDefault();
       setNodes(prev => outdentNode(prev, id));
-      setFocusedId(id); // Keep focus on the outdented node
+      setFocusedId(id);
     } else if (e.key === 'Tab') {
       e.preventDefault();
-      if (!currentValue.trim()) return;
-      setNodes(prev => {
-        const { newNodes, addedNodeId, rejected } = addChildToNode(prev, id);
-        if (addedNodeId) setFocusedId(addedNodeId);
-        return rejected ? prev : newNodes;
-      });
+      // Tab now indents the current node
+      setNodes(prev => indentNode(prev, id));
+      setFocusedId(id);
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (!currentValue.trim()) return;
