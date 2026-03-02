@@ -33,18 +33,26 @@ function App() {
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (!currentValue.trim()) return;
+
+      let nextFocusedId = null;
       setNodes(prev => {
-        // If we press Enter on the absolute root, treat it as appending a child
         if (prev.length === 1 && prev[0].id === id) {
           const { newNodes, addedNodeId, rejected } = addChildToNode(prev, id);
-          if (addedNodeId) setFocusedId(addedNodeId);
+          nextFocusedId = addedNodeId;
           return rejected ? prev : newNodes;
         }
 
         const { newNodes, addedNodeId, rejected } = addSiblingAfter(prev, id);
-        if (addedNodeId) setFocusedId(addedNodeId);
+        nextFocusedId = addedNodeId;
         return rejected ? prev : newNodes;
       });
+      // Defer the focus update slightly to ensure DOM is ready, though React handles this usually.
+      // The main issue was likely event bubbling or React batching.
+      // By using setTimeout, we guarantee the state update for nodes has committed before we force focus.
+      setTimeout(() => {
+        if (nextFocusedId) setFocusedId(nextFocusedId);
+      }, 0);
+
     } else if (e.key === 'Backspace' && currentValue === "") {
       e.preventDefault();
       setNodes(prev => {
