@@ -45,9 +45,16 @@ export const addSiblingAfter = (nodes, targetId, newValue = "") => {
   let addedNodeId = null;
   let rejected = false;
 
-  const traverse = (currentNodes) => {
+  const traverse = (currentNodes, depth = 0) => {
     const index = currentNodes.findIndex(n => n.id === targetId);
     if (index !== -1) {
+      if (depth === 0) {
+        // Prevent adding siblings at the absolute root level
+        rejected = true;
+        addedNodeId = targetId;
+        return currentNodes;
+      }
+
       // Prevent adding if the *next* sibling is already empty
       if (index + 1 < currentNodes.length && currentNodes[index + 1].value.trim() === "") {
         rejected = true;
@@ -63,7 +70,7 @@ export const addSiblingAfter = (nodes, targetId, newValue = "") => {
     }
     return currentNodes.map(node => {
       if (node.children.length > 0) {
-        return { ...node, children: traverse(node.children) };
+        return { ...node, children: traverse(node.children, depth + 1) };
       }
       return node;
     });
@@ -146,7 +153,7 @@ export const outdentNode = (nodes, targetId) => {
 
   findAncestors(nodes);
 
-  if (!parentId) return nodes; // Already at root level, cannot outdent
+  if (!parentId || !grandparentId) return nodes; // Cannot outdent root, or children of root
 
   // Get the target node object
   const getTarget = (currentNodes) => {

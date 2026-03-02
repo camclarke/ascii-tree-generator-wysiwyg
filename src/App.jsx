@@ -36,6 +36,13 @@ function App() {
       e.preventDefault();
       if (!currentValue.trim()) return;
       setNodes(prev => {
+        // If we press Enter on the absolute root, treat it as appending a child
+        if (prev.length === 1 && prev[0].id === id) {
+          const { newNodes, addedNodeId, rejected } = addChildToNode(prev, id);
+          if (addedNodeId) setFocusedId(addedNodeId);
+          return rejected ? prev : newNodes;
+        }
+
         const { newNodes, addedNodeId, rejected } = addSiblingAfter(prev, id);
         if (addedNodeId) setFocusedId(addedNodeId);
         return rejected ? prev : newNodes;
@@ -59,7 +66,7 @@ function App() {
   };
 
   const handleReset = () => {
-    const newRoot = createNode();
+    const newRoot = createNode("Project Root");
     setNodes([newRoot]);
     setFocusedId(newRoot.id);
   };
